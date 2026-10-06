@@ -230,6 +230,14 @@ static Shortcut shortcuts[] = {
 	{ DVTMMOD,              XK_v,           ttysend,        {.s = "\033[1;2S"} }, /* 左右分屏(F16) */
 	{ DVTMMOD,              XK_s,           ttysend,        {.s = "\033[15;2~"} }, /* 上下分屏(F17) */
 	{ DVTMMOD,              XK_bracketleft, ttysend,        {.s = "\033[21;2~"} }, /* 全屏切换(F22) */
+	/* 与 Windows Terminal 一致的肌肉记忆(对应其 sendInput h 等):
+	 * 直接向 pty 写入 C-w h/j/k/l 与 C-w w,由内部应用(vim/tmux 等)
+	 * 自行解释;st/dvtm 层不做任何窗口操作 */
+	{ TERMMOD,              XK_H,           ttysend,        {.s = "\027h"} }, /* C-S-h → C-w h */
+	{ TERMMOD,              XK_J,           ttysend,        {.s = "\027j"} }, /* C-S-j → C-w j */
+	{ TERMMOD,              XK_K,           ttysend,        {.s = "\027k"} }, /* C-S-k → C-w k */
+	{ TERMMOD,              XK_L,           ttysend,        {.s = "\027l"} }, /* C-S-l → C-w l */
+	{ ControlMask,          XK_period,      ttysend,        {.s = "\027w"} }, /* C-.   → C-w w */
 };
 
 /*

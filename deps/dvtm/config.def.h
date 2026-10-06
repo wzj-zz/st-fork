@@ -14,11 +14,14 @@
 enum {
 	DEFAULT,
 	BLUE,
+	SELTAB,
 };
 
 static Color colors[] = {
-	[DEFAULT] = { .fg = -1,         .bg = -1, .fg256 = -1, .bg256 = -1, },
-	[BLUE]    = { .fg = COLOR_BLUE, .bg = -1, .fg256 = 68, .bg256 = -1, },
+	[DEFAULT] = { .fg = -1,          .bg = -1,         .fg256 = -1,  .bg256 = -1, },
+	[BLUE]    = { .fg = COLOR_BLUE,  .bg = -1,         .fg256 = 68,  .bg256 = -1, },
+	/* 选中 tab:白字蓝底,与普通 tab 的蓝字明显区分 */
+	[SELTAB]  = { .fg = COLOR_WHITE, .bg = COLOR_BLUE, .fg256 = 255, .bg256 = 68, },
 };
 
 #define COLOR(c)        COLOR_PAIR(colors[c].pair)
@@ -46,7 +49,7 @@ static Color colors[] = {
 /* printf format string for the tag in the status bar */
 #define TAG_SYMBOL   "[%s]"
 /* curses attributes for the currently selected tags */
-#define TAG_SEL      (COLOR(BLUE) | A_BOLD)
+#define TAG_SEL      (COLOR(SELTAB) | A_BOLD)
 /* curses attributes for not selected tags which contain no windows */
 #define TAG_NORMAL   (COLOR(DEFAULT) | A_NORMAL)
 /* curses attributes for not selected tags which contain windows */

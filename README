@@ -30,64 +30,35 @@ See the man page for additional details.
 
 Fork customizations (wzj-zz/st-fork)
 ------------------------------------
-This fork is fully suckless: instead of a plain shell it starts
+启动后自动运行 dvtm(终端复用器),dvtm 缺失时回退普通 shell。
+根目录 make 会连同 deps/dvtm 一起编译;make install 一起安装。
 
-    dvtm
+键位:
 
-dvtm 是 suckless 风格的终端复用器("终端里的 dwm"),负责窗口和分屏。
-源码 vendored 在 deps/dvtm 下,根目录 make 一起编译,make install
-一起安装到 /usr/local;dvtm 缺失时启动自动回退到普通 shell。
+    C-S-t             新建 tab(全屏叠放,不自动分屏)
+    C-S-w             关闭当前 tab
+    C-Tab / C-S-Tab   下一个 / 上一个 tab
+    C-M-1 .. C-M-9    跳转到第 n 个 tab
+    C-M-v / C-M-s     左右 / 上下分屏
+    C-M-[             当前 pane 全屏切换
 
-vendored dvtm 带的补丁(更新上游代码后需重打):
-- dvtm.c: 新增 split() 动作(切布局 + 就地新建 pane,一次按键完成
-          tmux 式分屏);togglefullscreen() 全屏切换
-- config.def.h: 无前缀键设计——所有动作绑到 F13+ 功能键,由 st 的
-          快捷键直接发送对应转义序列触发;C-g 等按键原样透传给应用;
-          -m 命令行选项(改前缀)失效仅消费参数
-- config.def.h: 默认 layout 改为 fullscreen,新窗口像 tab 一样全屏
-          叠放而不是自动分屏
-- dvtm.c: 状态栏改为 tab 式窗口列表(显示 [#1][#2]...,选中高亮),
-          不再显示 tag 编号(纯 tab 用法下 tag 只会误导)
-- dvtm.c: fullscreen 布局下不画窗口标题行(show_border 返回 0),
-          tab 栏已足够,多出一行可用空间
-- vt.c:   rgb_to_256(),把 38;2;r;g;b 真彩色量化为 256 色,
-          修复 neovim 等 termguicolors 应用的颜色错乱
-- vt.c:   应答 DSR(CSI 5n/6n)与 DA(CSI c),修正 CPR 坐标从 1 起,
-          消除 nvim 0.12+ "Did not detect DSR response" 启动警告
-- vt.c:   吞掉 DCS/SOS/PM/APC 字符串序列(直到 ST/BEL),修复 nvim
-          XTGETCAP 查询载荷漏到屏幕变成乱码的问题
-- vt.c+dvtm.c: OSC 52 剪贴板序列转发给外层终端(st 写入 X 剪贴板),
-          nvim 等应用内复制可直接进系统剪贴板
-- vt.c+dvtm.c: 滚动支持——应用未捕获鼠标时滚轮滚动该 pane 的回滚
-          缓冲(每次 3 行),应用捕获鼠标(nvim 等)时滚轮按 X10
-          编码转发给应用;键盘 Shift+PgUp/PgDn 半页滚动(原生)
+分屏后切换 pane:C-Tab / C-M-数字,或鼠标点击目标 pane。
 
-滚动:每个 pane 独立 500 行回滚(SCROLL_HISTORY,config.def.h 可调),
-滚轮或 Shift+PgUp/PgDn 翻页,输入任意键自动弹回底部。
+透传映射(字节直接写入 pty,由 vim/tmux 等内部应用自行解释):
 
-Builtin keybindings,st 在 X 层拦截后直接发送 F13+ 功能键序列触发
-dvtm 动作(dvtm 侧无前缀键,见 deps/dvtm/config.def.h bindings[]):
+    C-S-h/j/k/l       发送 C-w h/j/k/l
+    C-.               发送 C-w w
 
-    C-S-t       new window(新窗口,≈ 新建 tab,全屏叠放)
-    C-S-w       关闭当前窗口(≈ 关闭 tab)
-    C-Tab / C-S-Tab   next / previous window
-    C-M-1 .. C-M-9    跳转到第 n 个窗口
-    C-M-v / C-M-s   左 右 / 上 下 分屏(切布局并就地新建 pane)
-    C-M-[       zoom pane(全屏/返回分屏切换)
+滚动:滚轮滚动指针下的 pane;若该 pane 中的应用捕获了鼠标
+(nvim 等),滚轮则转给应用。也可 Shift+PgUp/PgDn 半页翻屏。
+每个 pane 独立 500 行回滚,输入任意键自动弹回底部。
 
-分屏后切换 pane:C-Tab / C-M-数字,或鼠标直接点击目标 pane。
-(曾有的 C-M-h/j/k/l 方向焦点键已移除——tab 用法下冗余,且与
-XFCE/输入法快捷键冲突。)
+说明:
+- 无前缀键:C-g 等所有按键原样透传给应用
+- 应用内的 OSC 52 复制直接进入系统剪贴板
+- 注意:实体键盘上 Shift+F1 等组合会触发 dvtm 动作(已知取舍)
 
-dvtm 无 choose-window 式列表与 swap-window,故未映射。
-
-dvtm 的 C-g 前缀键位已整体移除,C-g 及其它所有按键原样透传给
-应用(emacs/readline 的 C-g 取消等不受影响)。退出 dvtm = 关掉
-所有窗口。
-注意:实体键盘上 Shift+F1 等组合同样产生 F13+ 序列,会触发 dvtm
-动作,属已知取舍。
-
-更新 vendored 组件:重新 clone dvtm 覆盖 deps/dvtm,再重打上述补丁。
+deps/dvtm 含有本地补丁(详见 git 历史),更新上游源码后需重打。
 
 
 Credits
