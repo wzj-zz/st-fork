@@ -657,6 +657,33 @@ die(const char *errstr, ...)
 	exit(1);
 }
 
+/* 有 ~/.tmux.conf 时：直接进常驻会话，配置由 conf 提供 */
+static char *defaultcmd[] = { "tmux", "new-session", "-A", "-s", "main", NULL };
+
+/* 无 ~/.tmux.conf 时：-f /dev/null 跳过默认配置，注入下面这套内置键位/设置 */
+static char *defaultcmd_builtin[] = {
+	"tmux", "-f", "/dev/null", "new-session", "-A", "-s", "main",
+	";", "set", "-g", "mouse", "on",
+	";", "set", "-s", "set-clipboard", "on",
+	";", "set", "-as", "terminal-features", ",st-256color:clipboard",
+	";", "bind", "-n", "C-M-,", "swap-window", "-t", "-1",
+	";", "bind", "-n", "C-M-.", "swap-window", "-t", "+1",
+	";", "bind", "-n", "C-M-u", "swap-window", "-t", "-1",
+	";", "bind", "-n", "C-M-o", "swap-window", "-t", "+1",
+	";", "bind", "-n", "C-M-w", "choose-window",
+	";", "bind", "-n", "C-M-n", "next-window",
+	";", "bind", "-n", "C-M-p", "previous-window",
+	";", "bind", "-n", "C-M-v", "split-window", "-h",
+	";", "bind", "-n", "C-M-s", "split-window", "-v",
+	";", "bind", "-n", "C-M-j", "select-pane", "-D",
+	";", "bind", "-n", "C-M-k", "select-pane", "-U",
+	";", "bind", "-n", "C-M-h", "select-pane", "-L",
+	";", "bind", "-n", "C-M-l", "select-pane", "-R",
+	";", "bind", "-n", "C-M-[", "resize-pane", "-Z",
+	";", "bind", "-n", "C-M-c", "new-window",
+	NULL
+};
+
 void
 execsh(char *cmd, char **args)
 {
@@ -684,7 +711,15 @@ execsh(char *cmd, char **args)
 		prog = utmp;
 		arg = NULL;
 	} else {
-		prog = sh;
+		char confpath[PATH_MAX];
+		snprintf(confpath, sizeof(confpath), "%s/.tmux.conf", pw->pw_dir);
+		if (access(confpath, R_OK) == 0) {
+			args = defaultcmd;         /* 有 conf：优先用用户配置 */
+			prog = defaultcmd[0];
+		} else {
+			args = defaultcmd_builtin; /* 无 conf：用内置配置 */
+			prog = defaultcmd_builtin[0];
+		}
 		arg = NULL;
 	}
 	DEFAULT(args, ((char *[]) {prog, arg, NULL}));

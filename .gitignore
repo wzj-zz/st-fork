@@ -1,0 +1,9 @@
+# 编译产物
+st
+*.o
+
+# 构建时由 config.def.h 生成
+config.h
+
+# tic 编译生成的 terminfo
+st-256color.terminfo
