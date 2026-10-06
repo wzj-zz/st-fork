@@ -360,13 +360,6 @@ drawbar(void) {
 	addstr(layout->symbol);
 	attrset(TAG_NORMAL);
 
-	for (unsigned int i = 0; i < MAX_KEYS && keys[i]; i++) {
-		if (keys[i] < ' ')
-			printw("^%c", 'A' - 1 + keys[i]);
-		else
-			printw("%c", keys[i]);
-	}
-
 	getyx(stdscr, y, x);
 	(void)y;
 	int maxwidth = screen.w - x - 2;
@@ -401,6 +394,9 @@ drawbar(void) {
 
 static int
 show_border(void) {
+	/* fullscreen(tab 堆叠)布局下不画窗口标题行——顶部 tab 栏已显示窗口列表 */
+	if (isarrange(fullscreen))
+		return 0;
 	return (bar.pos != BAR_OFF) || (clients && clients->next);
 }
 
@@ -1820,15 +1816,10 @@ parse_args(int argc, char *argv[]) {
 			case 'M':
 				mouse_events_enabled = !mouse_events_enabled;
 				break;
-			case 'm': {
-				char *mod = argv[++arg];
-				if (mod[0] == '^' && mod[1])
-					*mod = CTRL(mod[1]);
-				for (unsigned int b = 0; b < LENGTH(bindings); b++)
-					if (bindings[b].keys[0] == MOD)
-						bindings[b].keys[0] = *mod;
+			case 'm':
+				/* 无前缀键设计:-m(改前缀)已无效,仅消费参数保持兼容 */
+				arg++;
 				break;
-			}
 			case 'd':
 				set_escdelay(atoi(argv[++arg]));
 				if (ESCDELAY < 50)

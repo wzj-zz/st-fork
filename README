@@ -39,12 +39,17 @@ dvtm 是 suckless 风格的终端复用器("终端里的 dwm"),负责窗口和�
 一起安装到 /usr/local;dvtm 缺失时启动自动回退到普通 shell。
 
 vendored dvtm 带的补丁(更新上游代码后需重打):
-- dvtm.c: 新增 split() 动作(Mod-u/Mod-o = 切布局 + 就地新建 pane,
-          一次按键完成 tmux 式分屏);togglefullscreen() 全屏切换
-- config.def.h: Mod-z 绑定 togglefullscreen;默认 layout 改为
-          fullscreen,新窗口像 tab 一样全屏叠放而不是自动分屏
+- dvtm.c: 新增 split() 动作(切布局 + 就地新建 pane,一次按键完成
+          tmux 式分屏);togglefullscreen() 全屏切换
+- config.def.h: 无前缀键设计——所有动作绑到 F13+ 功能键,由 st 的
+          快捷键直接发送对应转义序列触发;C-g 等按键原样透传给应用;
+          -m 命令行选项(改前缀)失效仅消费参数
+- config.def.h: 默认 layout 改为 fullscreen,新窗口像 tab 一样全屏
+          叠放而不是自动分屏
 - dvtm.c: 状态栏改为 tab 式窗口列表(显示 [#1][#2]...,选中高亮),
           不再显示 tag 编号(纯 tab 用法下 tag 只会误导)
+- dvtm.c: fullscreen 布局下不画窗口标题行(show_border 返回 0),
+          tab 栏已足够,多出一行可用空间
 - vt.c:   rgb_to_256(),把 38;2;r;g;b 真彩色量化为 256 色,
           修复 neovim 等 termguicolors 应用的颜色错乱
 - vt.c:   应答 DSR(CSI 5n/6n)与 DA(CSI c),修正 CPR 坐标从 1 起,
@@ -60,20 +65,27 @@ vendored dvtm 带的补丁(更新上游代码后需重打):
 滚动:每个 pane 独立 500 行回滚(SCROLL_HISTORY,config.def.h 可调),
 滚轮或 Shift+PgUp/PgDn 翻页,输入任意键自动弹回底部。
 
-Builtin keybindings,st 在 X 层拦截后转换成 dvtm 前缀(C-g)序列
-发给 dvtm:
+Builtin keybindings,st 在 X 层拦截后直接发送 F13+ 功能键序列触发
+dvtm 动作(dvtm 侧无前缀键,见 deps/dvtm/config.def.h bindings[]):
 
     C-S-t       new window(新窗口,≈ 新建 tab,全屏叠放)
+    C-S-w       关闭当前窗口(≈ 关闭 tab)
     C-Tab / C-S-Tab   next / previous window
     C-M-1 .. C-M-9    跳转到第 n 个窗口
     C-M-v / C-M-s   左 右 / 上 下 分屏(切布局并就地新建 pane)
-    C-M-h/j/k/l focus left / down / up / right
     C-M-[       zoom pane(全屏/返回分屏切换)
+
+分屏后切换 pane:C-Tab / C-M-数字,或鼠标直接点击目标 pane。
+(曾有的 C-M-h/j/k/l 方向焦点键已移除——tab 用法下冗余,且与
+XFCE/输入法快捷键冲突。)
 
 dvtm 无 choose-window 式列表与 swap-window,故未映射。
 
-dvtm 前缀 C-g 仍可直接用:C-g 1..9 按编号切窗口,C-g q q 退出 dvtm,
-C-g x x 关闭当前窗口。
+dvtm 的 C-g 前缀键位已整体移除,C-g 及其它所有按键原样透传给
+应用(emacs/readline 的 C-g 取消等不受影响)。退出 dvtm = 关掉
+所有窗口。
+注意:实体键盘上 Shift+F1 等组合同样产生 F13+ 序列,会触发 dvtm
+动作,属已知取舍。
 
 更新 vendored 组件:重新 clone dvtm 覆盖 deps/dvtm,再重打上述补丁。
 

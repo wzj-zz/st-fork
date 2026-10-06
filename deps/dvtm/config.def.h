@@ -69,80 +69,32 @@ static Layout layouts[] = {
 	{ "TTT", bstack },
 };
 
-#define MOD  CTRL('g')
-#define TAGKEYS(KEY,TAG) \
-	{ { MOD, 'v', KEY,     }, { view,           { tags[TAG] }               } }, \
-	{ { MOD, 't', KEY,     }, { tag,            { tags[TAG] }               } }, \
-	{ { MOD, 'V', KEY,     }, { toggleview,     { tags[TAG] }               } }, \
-	{ { MOD, 'T', KEY,     }, { toggletag,      { tags[TAG] }               } },
+/* 无前缀键设计:不使用 MOD/TAGKEYS,动作全部绑到 F13+ 功能键 */
 
-/* you can specifiy at most 3 arguments */
+/*
+ * 不使用前缀键:所有动作绑定到 F13+ 功能键,由 st 的快捷键直接发送
+ * 对应的转义序列触发(见 st 的 config.def.h shortcuts 注释)。
+ * 其它按键(包括 C-g)原样透传给当前窗口的应用。
+ */
 static KeyBinding bindings[] = {
-	{ { MOD, 'c',          }, { create,         { NULL }                    } },
-	{ { MOD, 'C',          }, { create,         { NULL, NULL, "$CWD" }      } },
-	{ { MOD, 'x', 'x',     }, { killclient,     { NULL }                    } },
-	{ { MOD, 'j',          }, { focusnext,      { NULL }                    } },
-	{ { MOD, 'J',          }, { focusdown,      { NULL }                    } },
-	{ { MOD, 'K',          }, { focusup,        { NULL }                    } },
-	{ { MOD, 'H',          }, { focusleft,      { NULL }                    } },
-	{ { MOD, 'L',          }, { focusright,     { NULL }                    } },
-	{ { MOD, 'k',          }, { focusprev,      { NULL }                    } },
-	{ { MOD, 'f',          }, { setlayout,      { "[]=" }                   } },
-	{ { MOD, 'g',          }, { setlayout,      { "+++" }                   } },
-	{ { MOD, 'b',          }, { setlayout,      { "TTT" }                   } },
-	{ { MOD, 'm',          }, { setlayout,      { "[ ]" }                   } },
-	{ { MOD, 'z',          }, { togglefullscreen, { "[ ]" }                 } },
-	{ { MOD, 'u',          }, { split,          { "[]=" }                   } },
-	{ { MOD, 'o',          }, { split,          { "TTT" }                   } },
-	{ { MOD, ' ',          }, { setlayout,      { NULL }                    } },
-	{ { MOD, 'i',          }, { incnmaster,     { "+1" }                    } },
-	{ { MOD, 'd',          }, { incnmaster,     { "-1" }                    } },
-	{ { MOD, 'h',          }, { setmfact,       { "-0.05" }                 } },
-	{ { MOD, 'l',          }, { setmfact,       { "+0.05" }                 } },
-	{ { MOD, '.',          }, { toggleminimize, { NULL }                    } },
-	{ { MOD, 's',          }, { togglebar,      { NULL }                    } },
-	{ { MOD, 'S',          }, { togglebarpos,   { NULL }                    } },
-	{ { MOD, 'M',          }, { togglemouse,    { NULL }                    } },
-	{ { MOD, '\n',         }, { zoom ,          { NULL }                    } },
-	{ { MOD, '\r',         }, { zoom ,          { NULL }                    } },
-	{ { MOD, '1',          }, { focusn,         { "1" }                     } },
-	{ { MOD, '2',          }, { focusn,         { "2" }                     } },
-	{ { MOD, '3',          }, { focusn,         { "3" }                     } },
-	{ { MOD, '4',          }, { focusn,         { "4" }                     } },
-	{ { MOD, '5',          }, { focusn,         { "5" }                     } },
-	{ { MOD, '6',          }, { focusn,         { "6" }                     } },
-	{ { MOD, '7',          }, { focusn,         { "7" }                     } },
-	{ { MOD, '8',          }, { focusn,         { "8" }                     } },
-	{ { MOD, '9',          }, { focusn,         { "9" }                     } },
-	{ { MOD, '\t',         }, { focuslast,      { NULL }                    } },
-	{ { MOD, 'q', 'q',     }, { quit,           { NULL }                    } },
-	{ { MOD, 'a',          }, { togglerunall,   { NULL }                    } },
-	{ { MOD, CTRL('L'),    }, { redraw,         { NULL }                    } },
-	{ { MOD, 'r',          }, { redraw,         { NULL }                    } },
-	{ { MOD, 'e',          }, { copymode,       { "dvtm-editor" }           } },
-	{ { MOD, 'E',          }, { copymode,       { "dvtm-pager" }            } },
-	{ { MOD, '/',          }, { copymode,       { "dvtm-pager", "/" }       } },
-	{ { MOD, 'p',          }, { paste,          { NULL }                    } },
-	{ { MOD, KEY_PPAGE,    }, { scrollback,     { "-1" }                    } },
-	{ { MOD, KEY_NPAGE,    }, { scrollback,     { "1"  }                    } },
-	{ { MOD, '?',          }, { create,         { "man dvtm", "dvtm help" } } },
-	{ { MOD, MOD,          }, { send,           { (const char []){MOD, 0} } } },
-	{ { KEY_SPREVIOUS,     }, { scrollback,     { "-1" }                    } },
-	{ { KEY_SNEXT,         }, { scrollback,     { "1"  }                    } },
-	{ { MOD, '0',          }, { view,           { NULL }                    } },
-	{ { MOD, KEY_F(1),     }, { view,           { tags[0] }                 } },
-	{ { MOD, KEY_F(2),     }, { view,           { tags[1] }                 } },
-	{ { MOD, KEY_F(3),     }, { view,           { tags[2] }                 } },
-	{ { MOD, KEY_F(4),     }, { view,           { tags[3] }                 } },
-	{ { MOD, KEY_F(5),     }, { view,           { tags[4] }                 } },
-	{ { MOD, 'v', '0'      }, { view,           { NULL }                    } },
-	{ { MOD, 'v', '\t',    }, { viewprevtag,    { NULL }                    } },
-	{ { MOD, 't', '0'      }, { tag,            { NULL }                    } },
-	TAGKEYS( '1',                              0)
-	TAGKEYS( '2',                              1)
-	TAGKEYS( '3',                              2)
-	TAGKEYS( '4',                              3)
-	TAGKEYS( '5',                              4)
+	{ { KEY_F(13),     }, { create,         { NULL }                    } }, /* C-S-t   新建 tab */
+	{ { KEY_F(14),     }, { focusnext,      { NULL }                    } }, /* C-Tab   下一个 */
+	{ { KEY_F(15),     }, { focusprev,      { NULL }                    } }, /* C-S-Tab 上一个 */
+	{ { KEY_F(16),     }, { split,          { "[]=" }                   } }, /* C-M-v   左右分屏 */
+	{ { KEY_F(17),     }, { split,          { "TTT" }                   } }, /* C-M-s   上下分屏 */
+	{ { KEY_F(22),     }, { togglefullscreen, { "[ ]" }                 } }, /* C-M-[   全屏切换 */
+	{ { KEY_F(23),     }, { killclient,     { NULL }                    } }, /* C-S-w   关闭当前 tab */
+	{ { KEY_F(24),     }, { focusn,         { "1" }                     } }, /* C-M-1..9 跳第 n 个 */
+	{ { KEY_F(25),     }, { focusn,         { "2" }                     } },
+	{ { KEY_F(26),     }, { focusn,         { "3" }                     } },
+	{ { KEY_F(27),     }, { focusn,         { "4" }                     } },
+	{ { KEY_F(28),     }, { focusn,         { "5" }                     } },
+	{ { KEY_F(29),     }, { focusn,         { "6" }                     } },
+	{ { KEY_F(30),     }, { focusn,         { "7" }                     } },
+	{ { KEY_F(31),     }, { focusn,         { "8" }                     } },
+	{ { KEY_F(32),     }, { focusn,         { "9" }                     } },
+	{ { KEY_SPREVIOUS, }, { scrollback,     { "-1" }                    } }, /* Shift+PgUp 上滚 */
+	{ { KEY_SNEXT,     }, { scrollback,     { "1"  }                    } }, /* Shift+PgDn 下滚 */
 };
 
 static const ColorRule colorrules[] = {
