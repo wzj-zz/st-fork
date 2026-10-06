@@ -28,6 +28,27 @@ the st terminfo entry with the following command:
 
 See the man page for additional details.
 
+Fork customizations (wzj-zz/st-fork)
+------------------------------------
+This fork starts a tmux session automatically instead of a plain shell:
+
+    tmux new-session -A -s main
+
+- If ~/.tmux.conf exists, it is used as-is.
+- Otherwise a builtin config is injected (mouse on, clipboard
+  integration, and the keybindings below).
+
+Builtin keybindings (Ctrl+Alt+...), active only without ~/.tmux.conf:
+
+    C-M-c       new window
+    C-M-n / C-M-p   next / previous window
+    C-M-w       choose window (interactive list)
+    C-M-, / C-M-.   swap window left / right (also C-M-u / C-M-o)
+    C-M-v / C-M-s   split pane horizontally / vertically
+    C-M-h/j/k/l select pane left / down / up / right
+    C-M-[       zoom pane (toggle fullscreen)
+
+
 Credits
 -------
 Based on Aurélien APTEL <aurelien dot aptel at gmail dot com> bt source code.
