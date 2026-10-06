@@ -211,12 +211,15 @@ static Shortcut shortcuts[] = {
 	{ TERMMOD,              XK_Y,           selpaste,       {.i =  0} },
 	{ ShiftMask,            XK_Insert,      selpaste,       {.i =  0} },
 	{ TERMMOD,              XK_Num_Lock,    numlock,        {.i =  0} },
-	/* dvtm:窗口(≈ tab),浏览器风格键位 */
-	{ TERMMOD,              XK_T,           ttysend,        {.s = "\033[1;2P"} }, /* C-S-t 新建(F13) */
-	{ ControlMask,          XK_Tab,         ttysend,        {.s = "\033[1;2Q"} }, /* C-Tab 下一个(F14) */
-	{ TERMMOD,              XK_ISO_Left_Tab,ttysend,        {.s = "\033[1;2R"} }, /* C-S-Tab 上一个(F15) */
-	{ TERMMOD,              XK_W,           ttysend,        {.s = "\033[23;2~"} }, /* C-S-w 关闭当前 tab(F23) */
-	{ DVTMMOD,              XK_1,           ttysend,        {.s = "\033[24;2~"} }, /* C-M-1..9 跳第 n 个(F24-F32) */
+	/* dvtm:tab(= tag)层,浏览器风格键位 */
+	{ TERMMOD,              XK_T,           ttysend,        {.s = "\033[1;2P"} }, /* C-S-t 新建 tab(F13) */
+	{ ControlMask,          XK_Tab,         ttysend,        {.s = "\033[1;2Q"} }, /* C-Tab 下一个 tab(F14) */
+	{ TERMMOD,              XK_ISO_Left_Tab,ttysend,        {.s = "\033[1;2R"} }, /* C-S-Tab 上一个 tab(F15) */
+	{ TERMMOD,              XK_W,           ttysend,        {.s = "\033[23;2~"} }, /* C-S-w 关闭当前 pane/tab(F23) */
+	{ DVTMMOD,              XK_Tab,         ttysend,        {.s = "\033[20;5~"} }, /* C-M-Tab tab 内下一个 pane(F33) */
+	{ DVTMMOD,              XK_period,      ttysend,        {.s = "\033[20;5~"} }, /* C-M-.   同上(F33) */
+	{ DVTMMOD|ShiftMask,    XK_ISO_Left_Tab,ttysend,        {.s = "\033[23;5~"} }, /* C-M-S-Tab 上一个 pane(F34) */
+	{ DVTMMOD,              XK_1,           ttysend,        {.s = "\033[24;2~"} }, /* C-M-1..9 跳第 n 个 tab(F24-F32) */
 	{ DVTMMOD,              XK_2,           ttysend,        {.s = "\033[1;5P"} },
 	{ DVTMMOD,              XK_3,           ttysend,        {.s = "\033[1;5Q"} },
 	{ DVTMMOD,              XK_4,           ttysend,        {.s = "\033[1;5R"} },
@@ -225,10 +228,8 @@ static Shortcut shortcuts[] = {
 	{ DVTMMOD,              XK_7,           ttysend,        {.s = "\033[17;5~"} },
 	{ DVTMMOD,              XK_8,           ttysend,        {.s = "\033[18;5~"} },
 	{ DVTMMOD,              XK_9,           ttysend,        {.s = "\033[19;5~"} },
-	/* dvtm:分屏(split = 切布局 + 就地新建 pane);分屏后用 C-Tab /
-	 * C-M-数字或鼠标点击切换 pane,无方向焦点键(与输入法快捷键冲突) */
-	{ DVTMMOD,              XK_v,           ttysend,        {.s = "\033[1;2S"} }, /* 左右分屏(F16) */
-	{ DVTMMOD,              XK_s,           ttysend,        {.s = "\033[15;2~"} }, /* 上下分屏(F17) */
+	/* dvtm:分屏(split = 切布局 + 在当前 tab 内新建 pane) */
+	{ DVTMMOD,              XK_d,           ttysend,        {.s = "\033[1;2S"} }, /* 分屏(F16) */
 	{ DVTMMOD,              XK_bracketleft, ttysend,        {.s = "\033[21;2~"} }, /* 全屏切换(F22) */
 	/* 与 Windows Terminal 一致的肌肉记忆(对应其 sendInput h 等):
 	 * 直接向 pty 写入 C-w h/j/k/l 与 C-w w,由内部应用(vim/tmux 等)

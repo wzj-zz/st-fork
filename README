@@ -33,16 +33,18 @@ Fork customizations (wzj-zz/st-fork)
 启动后自动运行 dvtm(终端复用器),dvtm 缺失时回退普通 shell。
 根目录 make 会连同 deps/dvtm 一起编译;make install 一起安装。
 
-键位:
+键位(tab 是一等概念:每个 tab 独立全屏叠放,分屏只在当前 tab 内
+分出 pane,不影响其它 tab):
 
     C-S-t             新建 tab(全屏叠放,不自动分屏)
-    C-S-w             关闭当前 tab
+    C-S-w             关闭当前 pane;tab 内最后一个 pane 关闭则关闭 tab
     C-Tab / C-S-Tab   下一个 / 上一个 tab
     C-M-1 .. C-M-9    跳转到第 n 个 tab
-    C-M-v / C-M-s     左右 / 上下分屏
+    C-M-d             当前 tab 内分屏
+    C-M-Tab / C-M-.   当前 tab 内 pane 循环(C-M-S-Tab 反向)
     C-M-[             当前 pane 全屏切换
 
-分屏后切换 pane:C-Tab / C-M-数字,或鼠标点击目标 pane。
+分屏后也可用鼠标直接点击目标 pane。
 
 透传映射(字节直接写入 pty,由 vim/tmux 等内部应用自行解释):
 

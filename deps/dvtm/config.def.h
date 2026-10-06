@@ -57,7 +57,7 @@ static Color colors[] = {
 /* curses attributes for not selected tags which with urgent windows */
 #define TAG_URGENT (COLOR(BLUE) | A_NORMAL | A_BLINK)
 
-const char tags[][8] = { "1", "2", "3", "4", "5" };
+const char tags[][8] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
 #include "tile.c"
 #include "grid.c"
@@ -80,22 +80,23 @@ static Layout layouts[] = {
  * 其它按键(包括 C-g)原样透传给当前窗口的应用。
  */
 static KeyBinding bindings[] = {
-	{ { KEY_F(13),     }, { create,         { NULL }                    } }, /* C-S-t   新建 tab */
-	{ { KEY_F(14),     }, { focusnext,      { NULL }                    } }, /* C-Tab   下一个 */
-	{ { KEY_F(15),     }, { focusprev,      { NULL }                    } }, /* C-S-Tab 上一个 */
-	{ { KEY_F(16),     }, { split,          { "[]=" }                   } }, /* C-M-v   左右分屏 */
-	{ { KEY_F(17),     }, { split,          { "TTT" }                   } }, /* C-M-s   上下分屏 */
+	{ { KEY_F(13),     }, { createtab,      { NULL }                    } }, /* C-S-t   新建 tab */
+	{ { KEY_F(14),     }, { viewnexttab,    { NULL }                    } }, /* C-Tab   下一个 tab */
+	{ { KEY_F(15),     }, { viewprevtab,    { NULL }                    } }, /* C-S-Tab 上一个 tab */
+	{ { KEY_F(16),     }, { split,          { "[]=" }                   } }, /* C-M-d   分屏 */
 	{ { KEY_F(22),     }, { togglefullscreen, { "[ ]" }                 } }, /* C-M-[   全屏切换 */
-	{ { KEY_F(23),     }, { killclient,     { NULL }                    } }, /* C-S-w   关闭当前 tab */
-	{ { KEY_F(24),     }, { focusn,         { "1" }                     } }, /* C-M-1..9 跳第 n 个 */
-	{ { KEY_F(25),     }, { focusn,         { "2" }                     } },
-	{ { KEY_F(26),     }, { focusn,         { "3" }                     } },
-	{ { KEY_F(27),     }, { focusn,         { "4" }                     } },
-	{ { KEY_F(28),     }, { focusn,         { "5" }                     } },
-	{ { KEY_F(29),     }, { focusn,         { "6" }                     } },
-	{ { KEY_F(30),     }, { focusn,         { "7" }                     } },
-	{ { KEY_F(31),     }, { focusn,         { "8" }                     } },
-	{ { KEY_F(32),     }, { focusn,         { "9" }                     } },
+	{ { KEY_F(23),     }, { killclient,     { NULL }                    } }, /* C-S-w   关闭当前 pane/tab */
+	{ { KEY_F(33),     }, { focusnext,      { NULL }                    } }, /* C-M-Tab tab 内下一个 pane */
+	{ { KEY_F(34),     }, { focusprev,      { NULL }                    } }, /* C-M-S-Tab tab 内上一个 pane */
+	{ { KEY_F(24),     }, { viewn,          { "1" }                     } }, /* C-M-1..9 跳第 n 个 tab */
+	{ { KEY_F(25),     }, { viewn,          { "2" }                     } },
+	{ { KEY_F(26),     }, { viewn,          { "3" }                     } },
+	{ { KEY_F(27),     }, { viewn,          { "4" }                     } },
+	{ { KEY_F(28),     }, { viewn,          { "5" }                     } },
+	{ { KEY_F(29),     }, { viewn,          { "6" }                     } },
+	{ { KEY_F(30),     }, { viewn,          { "7" }                     } },
+	{ { KEY_F(31),     }, { viewn,          { "8" }                     } },
+	{ { KEY_F(32),     }, { viewn,          { "9" }                     } },
 	{ { KEY_SPREVIOUS, }, { scrollback,     { "-1" }                    } }, /* Shift+PgUp 上滚 */
 	{ { KEY_SNEXT,     }, { scrollback,     { "1"  }                    } }, /* Shift+PgDn 下滚 */
 };

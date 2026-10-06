@@ -214,6 +214,11 @@ static void toggletag(const char *args[]);
 static void toggleview(const char *args[]);
 static void viewprevtag(const char *args[]);
 static void view(const char *args[]);
+/* tab = tag 分层:新建 tab / 切换 tab / 跳转第 n 个 tab */
+static void createtab(const char *args[]);
+static void viewnexttab(const char *args[]);
+static void viewprevtab(const char *args[]);
+static void viewn(const char *args[]);
 static void zoom(const char *args[]);
 
 /* commands for use by mouse bindings */
@@ -341,18 +346,21 @@ drawbar(void) {
 	attrset(BAR_ATTR);
 	move(bar.y, 0);
 
-	/* tab 式窗口列表:每个窗口一格,编号与窗口边框标题 [#n] 一致,
-	 * 选中窗口高亮。不显示 tag——对纯 tab 用法只会误导 */
-	for (Client *c = clients; c; c = c->next) {
-		if (c->minimized)
+	/* tab 式列表:一个 tab(= tag)一格,按 tag 顺序连续编号,
+	 * 编号与 viewn(C-M-n)一致,当前 tab 高亮 */
+	int n = 0;
+	for (unsigned int i = 0; i < LENGTH(tags); i++) {
+		unsigned int bit = 1 << i;
+		if (!(occupied & bit))
 			continue;
-		if (c == sel)
+		n++;
+		if (tagset[seltags] & bit)
 			attrset(TAG_SEL);
-		else if (c->urgent)
+		else if (urgent & bit)
 			attrset(TAG_URGENT);
 		else
 			attrset(TAG_OCCUPIED);
-		printw("[#%d]", c->order);
+		printw("[#%d]", n);
 	}
 	attrset(TAG_NORMAL);
 
@@ -394,10 +402,11 @@ drawbar(void) {
 
 static int
 show_border(void) {
-	/* fullscreen(tab 堆叠)布局下不画窗口标题行——顶部 tab 栏已显示窗口列表 */
+	/* fullscreen 布局(tab 堆叠)或单窗口视图下不画标题行 */
 	if (isarrange(fullscreen))
 		return 0;
-	return (bar.pos != BAR_OFF) || (clients && clients->next);
+	Client *v = nextvisible(clients);
+	return v && nextvisible(v->next);
 }
 
 static void
@@ -504,6 +513,7 @@ arrange(void) {
 		wah++;
 	}
 	focus(NULL);
+	draw_all(); /* 切 tab/布局后整屏重绘,避免旧 view 残留 */
 	wnoutrefresh(stdscr);
 	drawbar();
 	draw_all();
@@ -588,7 +598,9 @@ focus(Client *c) {
 	sel = c;
 	if (lastsel) {
 		lastsel->urgent = false;
-		if (!isarrange(fullscreen)) {
+		/* lastsel 可能属于别的 tab(不可见):它的 curses 窗口仍占据着
+		 * 虚拟屏位置,画边框会污染别的 tab 的画面 */
+		if (!isarrange(fullscreen) && isvisible(lastsel)) {
 			draw_border(lastsel);
 			wnoutrefresh(lastsel->window);
 		}
@@ -599,12 +611,9 @@ focus(Client *c) {
 		attachstack(c);
 		settitle(c);
 		c->urgent = false;
-		if (isarrange(fullscreen)) {
-			draw(c);
-		} else {
-			draw_border(c);
-			wnoutrefresh(c->window);
-		}
+		/* 统一整窗重绘:切 tab 后新可见窗口的内容不在虚拟屏上,
+		 * 只画边框会留下残影 */
+		draw(c);
 	}
 	curs_set(c && !c->minimized && vt_cursor_visible(c->term));
 }
@@ -885,6 +894,89 @@ viewprevtag(const char *args[]) {
 	tagschanged();
 }
 
+/* 切到指定 tag(内部辅助,view() 的按位版本) */
+static void
+viewbit(unsigned int bit) {
+	if (bit && tagset[seltags] != bit) {
+		seltags ^= 1;
+		tagset[seltags] = bit;
+		tagschanged();
+	}
+}
+
+/* 所有已被窗口占用的 tag 位图 */
+static unsigned int
+usedtags(void) {
+	unsigned int used = 0;
+	for (Client *c = clients; c; c = c->next)
+		used |= c->tags;
+	return used;
+}
+
+/* 新建 tab:占一个空闲 tag 并切过去;新窗口独占该 tab(全屏) */
+static void
+createtab(const char *args[]) {
+	unsigned int used = usedtags();
+	unsigned int bit = 1;
+	while (bit & used)
+		bit <<= 1;
+	bit &= TAGMASK;
+	if (!bit)
+		return; /* tab 数已达上限 */
+	Client *old = sel;
+	create(args);
+	if (sel && sel != old) {
+		sel->tags = bit;
+		viewbit(bit);
+	}
+}
+
+/* 下一个/上一个有窗口的 tab,循环 */
+static void
+viewnexttab(const char *args[]) {
+	unsigned int used = usedtags();
+	unsigned int cur = tagset[seltags];
+	for (unsigned int i = 0; i < LENGTH(tags); i++) {
+		cur = (cur << 1) & TAGMASK;
+		if (!cur)
+			cur = 1;
+		if (cur & used) {
+			viewbit(cur);
+			return;
+		}
+	}
+}
+
+static void
+viewprevtab(const char *args[]) {
+	unsigned int used = usedtags();
+	unsigned int cur = tagset[seltags];
+	for (unsigned int i = 0; i < LENGTH(tags); i++) {
+		cur >>= 1;
+		if (!cur)
+			cur = 1 << (LENGTH(tags) - 1);
+		if (cur & used) {
+			viewbit(cur);
+			return;
+		}
+	}
+}
+
+/* 跳到第 n 个有窗口的 tab(与状态栏编号一致) */
+static void
+viewn(const char *args[]) {
+	int n = atoi(args[0]), k = 0;
+	for (unsigned int i = 0; i < LENGTH(tags); i++) {
+		unsigned int bit = 1 << i;
+		if (!(usedtags() & bit))
+			continue;
+		if (++k == n) {
+			viewbit(bit);
+			return;
+		}
+	}
+}
+
 static void
 keypress(int code) {
 	int key = -1;
@@ -1026,6 +1118,20 @@ destroy(Client *c) {
 			create(NULL);
 	}
 	free(c);
+	/* 当前 tab 最后一个窗口关闭:切到下一个还有窗口的 tab */
+	if (clients && !nextvisible(clients)) {
+		unsigned int used = usedtags();
+		unsigned int cur = tagset[seltags];
+		for (unsigned int i = 0; i < LENGTH(tags); i++) {
+			cur = (cur << 1) & TAGMASK;
+			if (!cur)
+				cur = 1;
+			if (cur & used) {
+				viewbit(cur);
+				break;
+			}
+		}
+	}
 	arrange();
 }
 
