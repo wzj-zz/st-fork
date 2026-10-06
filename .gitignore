@@ -7,3 +7,13 @@ config.h
 
 # tic 编译生成的 terminfo
 st-256color.terminfo
+
+# dvtm 构建产物(config.h 由 config.def.h 生成)
+deps/dvtm/dvtm
+deps/dvtm/dvtm-editor
+deps/dvtm/config.h
+
+# AppImage 打包产物与中间目录
+st-x86_64.AppImage
+AppDir/
+squashfs-root/

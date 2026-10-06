@@ -30,23 +30,52 @@ See the man page for additional details.
 
 Fork customizations (wzj-zz/st-fork)
 ------------------------------------
-This fork starts a tmux session automatically instead of a plain shell:
+This fork is fully suckless: instead of a plain shell it starts
 
-    tmux new-session -A -s main
+    dvtm
 
-- If ~/.tmux.conf exists, it is used as-is.
-- Otherwise a builtin config is injected (mouse on, clipboard
-  integration, and the keybindings below).
+dvtm 是 suckless 风格的终端复用器("终端里的 dwm"),负责窗口和分屏。
+源码 vendored 在 deps/dvtm 下,根目录 make 一起编译,make install
+一起安装到 /usr/local;dvtm 缺失时启动自动回退到普通 shell。
 
-Builtin keybindings (Ctrl+Alt+...), active only without ~/.tmux.conf:
+vendored dvtm 带的补丁(更新上游代码后需重打):
+- dvtm.c: 新增 split() 动作(Mod-u/Mod-o = 切布局 + 就地新建 pane,
+          一次按键完成 tmux 式分屏);togglefullscreen() 全屏切换
+- config.def.h: Mod-z 绑定 togglefullscreen;默认 layout 改为
+          fullscreen,新窗口像 tab 一样全屏叠放而不是自动分屏
+- dvtm.c: 状态栏改为 tab 式窗口列表(显示 [#1][#2]...,选中高亮),
+          不再显示 tag 编号(纯 tab 用法下 tag 只会误导)
+- vt.c:   rgb_to_256(),把 38;2;r;g;b 真彩色量化为 256 色,
+          修复 neovim 等 termguicolors 应用的颜色错乱
+- vt.c:   应答 DSR(CSI 5n/6n)与 DA(CSI c),修正 CPR 坐标从 1 起,
+          消除 nvim 0.12+ "Did not detect DSR response" 启动警告
+- vt.c:   吞掉 DCS/SOS/PM/APC 字符串序列(直到 ST/BEL),修复 nvim
+          XTGETCAP 查询载荷漏到屏幕变成乱码的问题
+- vt.c+dvtm.c: OSC 52 剪贴板序列转发给外层终端(st 写入 X 剪贴板),
+          nvim 等应用内复制可直接进系统剪贴板
+- vt.c+dvtm.c: 滚动支持——应用未捕获鼠标时滚轮滚动该 pane 的回滚
+          缓冲(每次 3 行),应用捕获鼠标(nvim 等)时滚轮按 X10
+          编码转发给应用;键盘 Shift+PgUp/PgDn 半页滚动(原生)
 
-    C-M-c       new window
-    C-M-n / C-M-p   next / previous window
-    C-M-w       choose window (interactive list)
-    C-M-, / C-M-.   swap window left / right (also C-M-u / C-M-o)
-    C-M-v / C-M-s   split pane horizontally / vertically
-    C-M-h/j/k/l select pane left / down / up / right
-    C-M-[       zoom pane (toggle fullscreen)
+滚动:每个 pane 独立 500 行回滚(SCROLL_HISTORY,config.def.h 可调),
+滚轮或 Shift+PgUp/PgDn 翻页,输入任意键自动弹回底部。
+
+Builtin keybindings,st 在 X 层拦截后转换成 dvtm 前缀(C-g)序列
+发给 dvtm:
+
+    C-S-t       new window(新窗口,≈ 新建 tab,全屏叠放)
+    C-Tab / C-S-Tab   next / previous window
+    C-M-1 .. C-M-9    跳转到第 n 个窗口
+    C-M-v / C-M-s   左 右 / 上 下 分屏(切布局并就地新建 pane)
+    C-M-h/j/k/l focus left / down / up / right
+    C-M-[       zoom pane(全屏/返回分屏切换)
+
+dvtm 无 choose-window 式列表与 swap-window,故未映射。
+
+dvtm 前缀 C-g 仍可直接用:C-g 1..9 按编号切窗口,C-g q q 退出 dvtm,
+C-g x x 关闭当前窗口。
+
+更新 vendored 组件:重新 clone dvtm 覆盖 deps/dvtm,再重打上述补丁。
 
 
 Credits

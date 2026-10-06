@@ -187,6 +187,15 @@ static MouseShortcut mshortcuts[] = {
 #define MODKEY Mod1Mask
 #define TERMMOD (ControlMask|ShiftMask)
 
+/*
+ * dvtm 键位:st 在 X 层拦下 Ctrl+Alt+*,转换成 dvtm 的前缀(默认 C-g,
+ * 即 \007)加对应功能键,再写入 pty。对应关系见 dvtm config.def.h 的
+ * bindings[](如 focusnext = Mod-j,侧向移动是 Mod-H/J/K/L)。
+ * swap-window 在 dvtm 中没有等价物,故 C-M-,/. 未映射。
+ */
+#define DVTMMOD (ControlMask|Mod1Mask)
+#define DVTMPRE "\007" /* dvtm 默认前缀 C-g */
+
 static Shortcut shortcuts[] = {
 	/* mask                 keysym          function        argument */
 	{ XK_ANY_MOD,           XK_Break,       sendbreak,      {.i =  0} },
@@ -201,6 +210,27 @@ static Shortcut shortcuts[] = {
 	{ TERMMOD,              XK_Y,           selpaste,       {.i =  0} },
 	{ ShiftMask,            XK_Insert,      selpaste,       {.i =  0} },
 	{ TERMMOD,              XK_Num_Lock,    numlock,        {.i =  0} },
+	/* dvtm:窗口(≈ tab),浏览器风格键位 */
+	{ TERMMOD,              XK_T,           ttysend,        {.s = DVTMPRE "c"} }, /* C-S-t 新建 */
+	{ ControlMask,          XK_Tab,         ttysend,        {.s = DVTMPRE "j"} }, /* C-Tab 下一个 */
+	{ TERMMOD,              XK_ISO_Left_Tab,ttysend,        {.s = DVTMPRE "k"} }, /* C-S-Tab 上一个 */
+	{ DVTMMOD,              XK_1,           ttysend,        {.s = DVTMPRE "1"} }, /* C-M-1..9 跳第 n 个 */
+	{ DVTMMOD,              XK_2,           ttysend,        {.s = DVTMPRE "2"} },
+	{ DVTMMOD,              XK_3,           ttysend,        {.s = DVTMPRE "3"} },
+	{ DVTMMOD,              XK_4,           ttysend,        {.s = DVTMPRE "4"} },
+	{ DVTMMOD,              XK_5,           ttysend,        {.s = DVTMPRE "5"} },
+	{ DVTMMOD,              XK_6,           ttysend,        {.s = DVTMPRE "6"} },
+	{ DVTMMOD,              XK_7,           ttysend,        {.s = DVTMPRE "7"} },
+	{ DVTMMOD,              XK_8,           ttysend,        {.s = DVTMPRE "8"} },
+	{ DVTMMOD,              XK_9,           ttysend,        {.s = DVTMPRE "9"} },
+	/* dvtm:分屏(split = 切布局 + 就地新建 pane) */
+	{ DVTMMOD,              XK_v,           ttysend,        {.s = DVTMPRE "u"} }, /* 左右分屏 */
+	{ DVTMMOD,              XK_s,           ttysend,        {.s = DVTMPRE "o"} }, /* 上下分屏 */
+	{ DVTMMOD,              XK_h,           ttysend,        {.s = DVTMPRE "H"} }, /* 焦点左 */
+	{ DVTMMOD,              XK_j,           ttysend,        {.s = DVTMPRE "J"} }, /* 焦点下 */
+	{ DVTMMOD,              XK_k,           ttysend,        {.s = DVTMPRE "K"} }, /* 焦点上 */
+	{ DVTMMOD,              XK_l,           ttysend,        {.s = DVTMPRE "L"} }, /* 焦点右 */
+	{ DVTMMOD,              XK_bracketleft, ttysend,        {.s = DVTMPRE "z"} }, /* 全屏切换 */
 };
 
 /*

@@ -7,7 +7,13 @@ include config.mk
 SRC = st.c x.c
 OBJ = $(SRC:.c=.o)
 
-all: st
+# vendored suckless 组件:dvtm(窗口/分屏),带 togglefullscreen 与真彩色补丁
+DEPS = deps/dvtm
+
+all: st deps
+
+deps:
+	for d in $(DEPS); do $(MAKE) -C $$d; done
 
 config.h:
 	cp config.def.h config.h
@@ -25,6 +31,7 @@ st: $(OBJ)
 
 clean:
 	rm -f st $(OBJ) st-$(VERSION).tar.gz
+	for d in $(DEPS); do $(MAKE) -C $$d clean; done
 
 dist: clean
 	mkdir -p st-$(VERSION)
@@ -43,9 +50,11 @@ install: st
 	chmod 644 $(DESTDIR)$(MANPREFIX)/man1/st.1
 	tic -sx st.info
 	@echo Please see the README file regarding the terminfo entry of st.
+	for d in $(DEPS); do $(MAKE) -C $$d install PREFIX=$(PREFIX) MANPREFIX=$(MANPREFIX); done
 
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/st
 	rm -f $(DESTDIR)$(MANPREFIX)/man1/st.1
+	for d in $(DEPS); do $(MAKE) -C $$d uninstall PREFIX=$(PREFIX) MANPREFIX=$(MANPREFIX); done
 
-.PHONY: all clean dist install uninstall
+.PHONY: all deps clean dist install uninstall
