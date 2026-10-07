@@ -30,8 +30,11 @@ See the man page for additional details.
 
 Fork customizations (wzj-zz/st-fork)
 ------------------------------------
-启动后自动运行 dvtm(终端复用器),dvtm 缺失时回退普通 shell。
-根目录 make 会连同 deps/dvtm 一起编译;make install 一起安装。
+启动后自动运行 dvtm(终端复用器)。根目录 make 产出单个 ELF:
+st 与 dvtm 编译进同一二进制(argv[0] 为 dvtm 时作为 dvtm 运行,
+即 `st dvtm`),部署只需拷贝这一个文件。无需安装 terminfo:dvtm
+内置 st-256color 条目;pane 的 TERM=st-256color 由系统的
+ncurses-term 包提供。
 
 键位(tab 是一等概念:每个 tab 独立全屏叠放,分屏只在当前 tab 内
 分出 pane,不影响其它 tab):

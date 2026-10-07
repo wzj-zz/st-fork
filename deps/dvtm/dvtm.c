@@ -1960,7 +1960,7 @@ parse_args(int argc, char *argv[]) {
 }
 
 int
-main(int argc, char *argv[]) {
+dvtm_main(int argc, char *argv[]) {
 	unsigned int key_index = 0;
 	memset(keys, 0, sizeof(keys));
 	sigset_t emptyset, blockset;

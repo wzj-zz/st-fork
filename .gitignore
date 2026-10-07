@@ -17,3 +17,6 @@ deps/dvtm/config.h
 st-x86_64.AppImage
 AppDir/
 squashfs-root/
+
+# 内置 ncurses 的解压构建目录(tarball 本身入库)
+deps/ncurses/ncurses-6.4/

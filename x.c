@@ -2037,7 +2037,7 @@ usage(void)
 }
 
 int
-main(int argc, char *argv[])
+st_main(int argc, char *argv[])
 {
 	xw.l = xw.t = 0;
 	xw.isfixed = False;

@@ -7,13 +7,40 @@ include config.mk
 SRC = st.c x.c
 OBJ = $(SRC:.c=.o)
 
-# vendored suckless 组件:dvtm(窗口/分屏),带 togglefullscreen 与真彩色补丁
-DEPS = deps/dvtm
+# st + dvtm multicall 单文件:argv[0] 为 dvtm 时运行内嵌的 dvtm
+NCURSES_DIR = deps/ncurses/ncurses-6.4
+NCURSES_TAR = deps/ncurses/ncurses-6.4.tar.gz
+NCURSES_LIB = $(NCURSES_DIR)/lib/libncursesw.a
 
-all: st deps
+DVTMFLAGS = -std=c99 -Ideps/dvtm -I$(NCURSES_DIR)/include -DNDEBUG \
+	-D_POSIX_C_SOURCE=200809L -D_XOPEN_SOURCE=700 -D_XOPEN_SOURCE_EXTENDED \
+	-DVERSION=\"0.15-stfork\"
 
-deps:
-	for d in $(DEPS); do $(MAKE) -C $$d; done
+all: st
+
+# 静态 ncursesw,--with-fallbacks=st-256color 把 terminfo 编进库(零文件落地)
+$(NCURSES_DIR)/.configured: $(NCURSES_TAR)
+	tar -xzf $(NCURSES_TAR) -C deps/ncurses
+	cd $(NCURSES_DIR) && ./configure --enable-widec --without-shared \
+		--with-normal --without-debug --without-ada --without-cxx-binding \
+		--without-tests --without-manpages --disable-db-install \
+		--with-fallbacks="st-256color"
+	touch $@
+
+$(NCURSES_LIB): $(NCURSES_DIR)/.configured
+	$(MAKE) -C $(NCURSES_DIR) libs
+
+deps/dvtm/config.h: deps/dvtm/config.def.h
+	cp deps/dvtm/config.def.h $@
+
+dvtm.o: deps/dvtm/dvtm.c deps/dvtm/config.h $(NCURSES_LIB)
+	$(CC) $(CFLAGS) $(DVTMFLAGS) -c -o $@ $<
+
+vt.o: deps/dvtm/vt.c deps/dvtm/config.h $(NCURSES_LIB)
+	$(CC) $(CFLAGS) $(DVTMFLAGS) -c -o $@ $<
+
+dispatch.o: dispatch.c
+	$(CC) $(CFLAGS) -c -o $@ $<
 
 config.h:
 	cp config.def.h config.h
@@ -26,12 +53,12 @@ x.o: arg.h config.h st.h win.h
 
 $(OBJ): config.h config.mk
 
-st: $(OBJ)
-	$(CC) -o $@ $(OBJ) $(STLDFLAGS)
+st: $(OBJ) dispatch.o dvtm.o vt.o
+	$(CC) -o $@ $(OBJ) dispatch.o dvtm.o vt.o $(NCURSES_LIB) $(STLDFLAGS)
 
 clean:
-	rm -f st $(OBJ) st-$(VERSION).tar.gz
-	for d in $(DEPS); do $(MAKE) -C $$d clean; done
+	rm -f st $(OBJ) dispatch.o dvtm.o vt.o st-$(VERSION).tar.gz
+	rm -rf $(NCURSES_DIR)
 
 dist: clean
 	mkdir -p st-$(VERSION)
@@ -50,11 +77,9 @@ install: st
 	chmod 644 $(DESTDIR)$(MANPREFIX)/man1/st.1
 	tic -sx st.info
 	@echo Please see the README file regarding the terminfo entry of st.
-	for d in $(DEPS); do $(MAKE) -C $$d install PREFIX=$(PREFIX) MANPREFIX=$(MANPREFIX); done
 
 uninstall:
 	rm -f $(DESTDIR)$(PREFIX)/bin/st
 	rm -f $(DESTDIR)$(MANPREFIX)/man1/st.1
-	for d in $(DEPS); do $(MAKE) -C $$d uninstall PREFIX=$(PREFIX) MANPREFIX=$(MANPREFIX); done
 
 .PHONY: all deps clean dist install uninstall

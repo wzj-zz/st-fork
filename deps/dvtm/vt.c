@@ -1930,7 +1930,7 @@ void vt_init(void)
 	is_utf8_locale();
 	char *term = getenv("DVTM_TERM");
 	if (!term)
-		term = "dvtm";
+		term = "st"; /* pane 声明为 st-256color:vt 行为对齐 st,且系统普遍自带该 terminfo */
 	snprintf(vt_term, sizeof vt_term, "%s%s", term, COLORS >= 256 ? "-256color" : "");
 }
 

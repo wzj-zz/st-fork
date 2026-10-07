@@ -668,7 +668,7 @@ execsh(char *cmd, char **args)
 {
 	char *sh, *prog, *arg;
 	const struct passwd *pw;
-	int usefallback = (!args && !scroll && !utmp);
+	int usefallback = (!args && !scrollprog && !utmp);
 
 	errno = 0;
 	if ((pw = getpwuid(getuid())) == NULL) {
@@ -684,8 +684,8 @@ execsh(char *cmd, char **args)
 	if (args) {
 		prog = args[0];
 		arg = NULL;
-	} else if (scroll) {
-		prog = scroll;
+	} else if (scrollprog) {
+		prog = scrollprog;
 		arg = utmp ? utmp : sh;
 	} else if (utmp) {
 		prog = utmp;
@@ -713,6 +713,17 @@ execsh(char *cmd, char **args)
 	signal(SIGTERM, SIG_DFL);
 	signal(SIGALRM, SIG_DFL);
 
+	if (strcmp(prog, "dvtm") == 0) {
+		/* multicall:dvtm 内嵌于本二进制,argv[0]="dvtm" 触发分发。
+		 * readlink 出真实路径再 exec,让进程的 comm 显示为 st 而非 exe */
+		char self[4096];
+		ssize_t n = readlink("/proc/self/exe", self, sizeof self - 1);
+		if (n > 0) {
+			self[n] = '\0';
+			execv(self, args);
+		}
+		execv("/proc/self/exe", args); /* 二进制已被删除/替换时的兜底 */
+	}
 	execvp(prog, args);
 	/* 默认命令(dvtm)启动失败时回退到 shell,避免窗口闪退 */
 	if (usefallback)
