@@ -217,7 +217,8 @@ static Shortcut shortcuts[] = {
 	{ TERMMOD,              XK_ISO_Left_Tab,ttysend,        {.s = "\033[1;2R"} }, /* C-S-Tab 上一个 tab(F15) */
 	{ TERMMOD,              XK_W,           ttysend,        {.s = "\033[23;2~"} }, /* C-S-w 关闭当前 pane/tab(F23) */
 	{ DVTMMOD,              XK_Tab,         ttysend,        {.s = "\033[20;5~"} }, /* C-M-Tab tab 内下一个 pane(F33) */
-	{ DVTMMOD,              XK_period,      ttysend,        {.s = "\033[20;5~"} }, /* C-M-.   同上(F33) */
+	{ TERMMOD,              XK_greater,     ttysend,        {.s = "\033[20;5~"} }, /* C-S-.   同上(US 布局 Shift+. = >) */
+	{ TERMMOD,              XK_period,      ttysend,        {.s = "\033[20;5~"} }, /* C-S-.   同上(部分布局 keysym 不变) */
 	{ DVTMMOD|ShiftMask,    XK_ISO_Left_Tab,ttysend,        {.s = "\033[23;5~"} }, /* C-M-S-Tab 上一个 pane(F34) */
 	{ DVTMMOD,              XK_1,           ttysend,        {.s = "\033[24;2~"} }, /* C-M-1..9 跳第 n 个 tab(F24-F32) */
 	{ DVTMMOD,              XK_2,           ttysend,        {.s = "\033[1;5P"} },
@@ -229,7 +230,7 @@ static Shortcut shortcuts[] = {
 	{ DVTMMOD,              XK_8,           ttysend,        {.s = "\033[18;5~"} },
 	{ DVTMMOD,              XK_9,           ttysend,        {.s = "\033[19;5~"} },
 	/* dvtm:分屏(split = 切布局 + 在当前 tab 内新建 pane) */
-	{ DVTMMOD,              XK_d,           ttysend,        {.s = "\033[1;2S"} }, /* 分屏(F16) */
+	{ DVTMMOD|ShiftMask,    XK_D,           ttysend,        {.s = "\033[1;2S"} }, /* C-M-S-d 分屏(F16) */
 	{ DVTMMOD,              XK_bracketleft, ttysend,        {.s = "\033[21;2~"} }, /* 全屏切换(F22) */
 	/* 与 Windows Terminal 一致的肌肉记忆(对应其 sendInput h 等):
 	 * 直接向 pty 写入 C-w h/j/k/l 与 C-w w,由内部应用(vim/tmux 等)

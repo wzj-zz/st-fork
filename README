@@ -40,8 +40,8 @@ Fork customizations (wzj-zz/st-fork)
     C-S-w             关闭当前 pane;tab 内最后一个 pane 关闭则关闭 tab
     C-Tab / C-S-Tab   下一个 / 上一个 tab
     C-M-1 .. C-M-9    跳转到第 n 个 tab
-    C-M-d             当前 tab 内分屏
-    C-M-Tab / C-M-.   当前 tab 内 pane 循环(C-M-S-Tab 反向)
+    C-M-S-d           当前 tab 内分屏
+    C-M-Tab / C-S-.   当前 tab 内 pane 循环(C-M-S-Tab 反向)
     C-M-[             当前 pane 全屏切换
 
 分屏后也可用鼠标直接点击目标 pane。
