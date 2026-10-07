@@ -1,0 +1,35 @@
+# 打 tag(v*)推送后自动构建并发布 Release,产出单文件 ELF:st-x86_64
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch: # 也允许在 Actions 页手动触发
+
+permissions:
+  contents: write # 允许创建 Release
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04 # 低版本 glibc 构建,产物向高版本兼容
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安装构建依赖
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libx11-dev libxft-dev libfontconfig-dev libfreetype-dev \
+            pkg-config ncurses-term
+
+      - name: 构建单文件 ELF(ncurses 静态 + terminfo 内置,见根 Makefile)
+        run: make
+
+      - name: 产出物改名
+        run: mv st st-x86_64
+
+      - name: 发布 Release 并挂载二进制
+        uses: softprops/action-gh-release@v2
+        with:
+          files: st-x86_64
+          generate_release_notes: true
