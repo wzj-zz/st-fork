@@ -624,29 +624,41 @@ static bool is_valid_csi_ender(int c)
 	    || (c == '@' || c == '`');
 }
 
-/* 24bit RGB -> xterm 256 色板量化(6x6x6 色彩立方体 + 灰阶斜坡)。
- * 用于把 SGR 38;2;r;g;b / 48;2;r;g;b 真彩色序列近似到 256 色,
- * 否则残余参数会被当作独立 SGR 码解析,导致颜色错乱(neovim 等)。 */
+/* 24bit RGB -> xterm 256 色板量化:在立方体(16-231)与灰阶斜坡
+ * (232-255)上做最近邻搜索。此前的阈值判据会把近灰色(通道差≥8)
+ * 粗暴踢进立方体,把 #1a1d23 这类深色直接量成纯黑,破坏 nvim 配色
+ * 中 Normal/NormalNC 等刻意设计的微弱明暗差。 */
 static int
 rgb_to_256(int r, int g, int b)
 {
+	static const int cube[6] = { 0, 95, 135, 175, 215, 255 };
+	long d, bestd = LONG_MAX;
+	int best = 16;
+
 	r = r < 0 ? 0 : r > 255 ? 255 : r;
 	g = g < 0 ? 0 : g > 255 ? 255 : g;
 	b = b < 0 ? 0 : b > 255 ? 255 : b;
 
-	/* 三通道近似相等时走灰阶(232-255),灰色还原更准 */
-	if (abs(r-g) < 8 && abs(g-b) < 8 && abs(r-b) < 8) {
-		int v = (r + g + b) / 3;
-		if (v < 8)
-			return 16;
-		if (v > 238)
-			return 231;
-		return 232 + (v - 8) / 10;
+	for (int ri = 0; ri < 6; ri++)
+		for (int gi = 0; gi < 6; gi++)
+			for (int bi = 0; bi < 6; bi++) {
+				d = (long)(r-cube[ri])*(r-cube[ri])
+				  + (long)(g-cube[gi])*(g-cube[gi])
+				  + (long)(b-cube[bi])*(b-cube[bi]);
+				if (d < bestd) {
+					bestd = d;
+					best = 16 + 36*ri + 6*gi + bi;
+				}
+			}
+	for (int i = 0; i < 24; i++) {
+		int v = 8 + 10 * i;
+		d = (long)(r-v)*(r-v) + (long)(g-v)*(g-v) + (long)(b-v)*(b-v);
+		if (d < bestd) {
+			bestd = d;
+			best = 232 + i;
+		}
 	}
-	r = r < 48 ? 0 : r < 115 ? 1 : (r - 35) / 40;
-	g = g < 48 ? 0 : g < 115 ? 1 : (g - 35) / 40;
-	b = b < 48 ? 0 : b < 115 ? 1 : (b - 35) / 40;
-	return 16 + 36*r + 6*g + b;
+	return best;
 }
 
 /* interprets a 'set attribute' (SGR) CSI escape sequence */
