@@ -84,6 +84,8 @@ static KeyBinding bindings[] = {
 	{ { KEY_F(14),     }, { viewnexttab,    { NULL }                    } }, /* C-Tab   下一个 tab */
 	{ { KEY_F(15),     }, { viewprevtab,    { NULL }                    } }, /* C-S-Tab 上一个 tab */
 	{ { KEY_F(16),     }, { split,          { "[]=" }                   } }, /* C-M-d   分屏 */
+	{ { KEY_F(17),     }, { createtab,      { "opencode" }              } }, /* C-M-S-0 新 tab 打开 opencode */
+	{ { KEY_F(18),     }, { createtab,      { "nvim" }                  } }, /* C-S-4   新 tab 打开 nvim */
 	{ { KEY_F(22),     }, { togglefullscreen, { "[ ]" }                 } }, /* C-M-[   全屏切换 */
 	{ { KEY_F(23),     }, { killclient,     { NULL }                    } }, /* C-S-w   关闭当前 pane/tab */
 	{ { KEY_F(33),     }, { focusnext,      { NULL }                    } }, /* C-M-Tab tab 内下一个 pane */

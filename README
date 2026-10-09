@@ -40,10 +40,12 @@ ncurses-term 包提供。
 分出 pane,不影响其它 tab):
 
     C-S-t             新建 tab(全屏叠放,不自动分屏)
+    C-S-4             新建 tab 并打开 nvim
     C-S-w             关闭当前 pane;tab 内最后一个 pane 关闭则关闭 tab
     C-Tab / C-S-Tab   下一个 / 上一个 tab
     C-M-1 .. C-M-9    跳转到第 n 个 tab
     C-M-S-d           当前 tab 内分屏
+    C-M-S-0           新建 tab 并打开 opencode
     C-M-Tab / C-S-.   当前 tab 内 pane 循环(C-M-S-Tab 反向)
     C-M-[             当前 pane 全屏切换
 
