@@ -1,3 +1,30 @@
+st-dvtm - 内嵌 dvtm 的 st fork
+==============================
+
+本 fork 把 dvtm("终端里的 dwm":tab/分屏管理)编译进 st 同一个 ELF,
+multicall 结构,自包含、无外部依赖:
+
+- 默认命令即内嵌 dvtm;argv[0] 或首个参数为 dvtm 时进入 dvtm_main
+  (见 dispatch.c;st 启动 dvtm 用 execv("/proc/self/exe", ...) 复用自身)
+- dvtm 源码 vendor 在 deps/dvtm;ncurses 从 deps/ncurses 的 tarball
+  解包并静态链接(--without-shared),系统无需安装 dvtm/ncurses
+- 键位:st 在 X 层拦截组合键,转成 F13+ 功能键序列交给 dvtm 解码。
+  st 侧映射见 config.h 的 DVTMMOD/TERMMOD 表,
+  dvtm 动作绑定见 deps/dvtm/config.def.h 的 bindings[]
+- 注意:st -e cmd 会绕过 dvtm 直接 exec cmd(此时 dvtm 快捷键失效);
+  要在 dvtm 首窗格运行指定程序,用 st -e dvtm cmd(仅支持单个词)
+
+构建(自动解包并静态编译 ncurses):
+
+    make
+
+部署:
+
+    cp st ~/.LinuxTools/bin/st
+
+以下是上游原版 README
+----------------------
+
 st - simple terminal
 --------------------
 st is a simple terminal emulator for X which sucks less.

@@ -50,6 +50,16 @@ st \- simple terminal
 .SH DESCRIPTION
 .B st
 is a simple terminal emulator.
+This fork embeds dvtm (tab/pane management, "dwm in a terminal") into
+the same binary via a multicall dispatcher: the default command is the
+embedded dvtm, and
+.RB "\[lq] st " dvtm
+.RI "\[rq] runs it explicitly. The binary is self-contained"
+(vendored dvtm, statically linked ncurses); see README for details.
+dvtm shortcuts are intercepted by st at the X layer and forwarded as
+F13+ function-key sequences; the mapping is compiled in from
+.IR config.h
+(DVTMMOD/TERMMOD tables).
 .SH OPTIONS
 .TP
 .B \-a
@@ -123,6 +133,11 @@ on the command line, as in xterm / rxvt.
 This option is only intended for compatibility,
 and all the remaining arguments are used as a command
 even without it.
+Note that
+.B \-e
+bypasses the embedded dvtm entirely (all dvtm shortcuts stop working);
+to run a command inside dvtm's first pane, use
+.BR "\-e dvtm cmd" .
 .SH SHORTCUTS
 .TP
 .B Break

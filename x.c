@@ -2033,7 +2033,15 @@ usage(void)
 	    "       %s [-aiv] [-c class] [-f font] [-g geometry]"
 	    " [-n name] [-o file]\n"
 	    "          [-T title] [-t title] [-w windowid] -l line"
-	    " [stty_args ...]\n", argv0, argv0);
+	    " [stty_args ...]\n"
+	    "\n"
+	    "multicall: 本二进制内嵌 dvtm(默认命令,自包含,无外部依赖)。\n"
+	    "  %s dvtm [-v] [-M] [-m mod] [-d delay] [-h lines] [-t title]\n"
+	    "          [-s status-fifo] [-c cmd-fifo] [cmd...]\n"
+	    "  %s -e dvtm cmd  在 dvtm 首窗格运行 cmd\n"
+	    "  注意: 直接 -e cmd 会绕过 dvtm,dvtm 快捷键(C-M-*/C-S-*)全部失效。\n"
+	    "  键位映射见 config.h 的 DVTMMOD/TERMMOD 表。\n",
+	    argv0, argv0, argv0, argv0);
 }
 
 int
