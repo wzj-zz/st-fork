@@ -517,6 +517,13 @@ arrange(void) {
 	wnoutrefresh(stdscr);
 	drawbar();
 	draw_all();
+	/* 切 tab / 分屏 / 关 pane / 改布局后,新可见的 pane 里部分全屏应用
+	 * (neovim 等)在被隐藏期间已清屏却不再重画,主动发 SIGWINCH 请它们重绘,
+	 * 避免画面空白、需手动滚动或弹面板才恢复 */
+	for (Client *c = nextvisible(clients); c; c = nextvisible(c->next)) {
+		if (!c->minimized)
+			vt_redraw(c->term);
+	}
 }
 
 static void
@@ -821,12 +828,6 @@ tagschanged() {
 		toggleminimize(NULL);
 	}
 	arrange();
-	/* 切 tab 后新可见的 pane:部分全屏应用(neovim 等)在被隐藏期间
-	 * 已清屏却不再重画,主动发 SIGWINCH 请它们重绘,避免空白需手动刷新 */
-	for (Client *c = nextvisible(clients); c; c = nextvisible(c->next)) {
-		if (!c->minimized)
-			vt_redraw(c->term);
-	}
 }
 
 static void
