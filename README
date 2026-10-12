@@ -18,9 +18,9 @@ multicall 结构,自包含、无外部依赖:
 
     make
 
-部署:
+部署(复制到任意 PATH 目录即可):
 
-    cp st ~/.LinuxTools/bin/st
+    cp st /path/to/bin/st
 
 以下是上游原版 README
 ----------------------
