@@ -1551,6 +1551,14 @@ void vt_resize(Vt *t, int rows, int cols)
 	kill(-t->pid, SIGWINCH);
 }
 
+/* 请求应用重绘(不改尺寸,只发 SIGWINCH):部分全屏应用(neovim 等)
+ * 被隐藏期间已经清屏,重新显示时不会自行重画,靠这个信号让它刷新 */
+void vt_redraw(Vt *t)
+{
+	if (t && t->pid > 0)
+		kill(-t->pid, SIGWINCH);
+}
+
 void vt_destroy(Vt *t)
 {
 	if (!t)

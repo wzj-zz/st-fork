@@ -821,6 +821,12 @@ tagschanged() {
 		toggleminimize(NULL);
 	}
 	arrange();
+	/* 切 tab 后新可见的 pane:部分全屏应用(neovim 等)在被隐藏期间
+	 * 已清屏却不再重画,主动发 SIGWINCH 请它们重绘,避免空白需手动刷新 */
+	for (Client *c = nextvisible(clients); c; c = nextvisible(c->next)) {
+		if (!c->minimized)
+			vt_redraw(c->term);
+	}
 }
 
 static void

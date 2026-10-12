@@ -44,6 +44,7 @@ void *vt_data_get(Vt*);
 
 Vt *vt_create(int rows, int cols, int scroll_buf_sz);
 void vt_resize(Vt*, int rows, int cols);
+void vt_redraw(Vt*);
 void vt_destroy(Vt*);
 pid_t vt_forkpty(Vt*, const char *p, const char *argv[], const char *cwd, const char *env[], int *to, int *from);
 int vt_pty_get(Vt*);
